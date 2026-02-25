@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"syscall"
 
 	"github.com/mobile-next/mobilecli/cli"
 	"github.com/mobile-next/mobilecli/commands"
@@ -28,7 +27,7 @@ func main() {
 
 	// setup signal handling for graceful shutdown
 	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	signal.Notify(sigChan, os.Interrupt)
 
 	// run command in goroutine
 	done := make(chan error, 1)

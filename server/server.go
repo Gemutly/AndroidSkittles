@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"syscall"
 	"time"
 
 	"github.com/google/uuid"
@@ -245,7 +244,7 @@ func StartServer(addr string, enableCORS bool) error {
 
 	// setup signal handling for graceful shutdown
 	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	signal.Notify(sigChan, os.Interrupt)
 
 	performShutdown := func() error {
 		if err := hook.Shutdown(); err != nil {
@@ -940,7 +939,7 @@ func handleServerShutdown(params json.RawMessage) (interface{}, error) {
 	go func() {
 		time.Sleep(100 * time.Millisecond) // allow response to be sent
 		select {
-		case shutdownChan <- syscall.SIGTERM:
+		case shutdownChan <- os.Interrupt:
 		default:
 		}
 	}()
