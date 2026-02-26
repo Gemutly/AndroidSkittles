@@ -1,277 +1,270 @@
-# mobilecli
+# AndroidSkittles
 
-A universal command-line tool for managing iOS and Android devices, simulators, emulators and apps from [Mobile Next](https://github.com/mobile-next/).
+A command-line tool for managing Android devices and emulators. Forked from [mobilecli](https://github.com/mobile-next/mobilecli) with a focus on Android-only support.
 
-<p align="center">
-  <a href="https://github.com/mobile-next/mobilecli">
-    <img src="https://img.shields.io/github/stars/mobile-next/mobilecli" alt="Mobile Next Stars" />
-  </a>
-  <a href="https://github.com/mobile-next/mobilecli">
-    <img src="https://img.shields.io/github/contributors/mobile-next/mobilecli?color=green" alt="Mobile Next Downloads" />
-  </a>
-  <a href="https://www.npmjs.com/package/@mobilenext/mobilecli">
-    <img src="https://img.shields.io/npm/dm/@mobilenext/mobilecli?logo=npm&style=flat&color=red" alt="npm">
-  </a>
-  <a href="https://github.com/mobile-next/mobilecli/releases">
-    <img src="https://img.shields.io/github/release/mobile-next/mobilecli">
-  </a>
-  <a href="https://github.com/mobile-next/mobilecli/blob/main/LICENSE">
-    <img src="https://img.shields.io/badge/license-AGPL v3.0-blue.svg" alt="Mobile MCP is released under the AGPL v3.0 License">
-  </a>
-</p>
+## Features
 
-<p align="center">
-  <a href="http://mobilenexthq.com/join-slack">
-      <img src="https://img.shields.io/badge/join-Slack-blueviolet?logo=slack&style=flat" alt="Slack community channel" />
-  </a>
-</p>
+- **Device Management**: List, manage, and interact with connected Android devices and emulators
+- **Emulator Control**: Boot and shutdown emulators programmatically
+- **Screenshot Capture**: Take screenshots with PNG/JPEG format options
+- **Screen Streaming**: Stream MJPEG/H.264 video directly from device
+- **Device Control**: Reboot, tap, swipe, long-press, and hardware button input
+- **App Management**: Launch, terminate, install, uninstall, and list apps
+- **HTTP/WebSocket API**: JSON-RPC 2.0 interface for remote control
 
-## Features 🚀
-
-- **Device Management**: List, manage, interactive with connected mobile devices
-- **Cross-Platform Support**: Works with iOS physical devices, iOS simulators, Android devices, and Android emulators
-- **Emulator/Simulator Control**: Boot and shutdown emulators and simulators programmatically
-- **Screenshot Capture**: Take screenshots from any connected device with format options
-- **Multiple Output Formats**: Save screenshots as PNG or JPEG with quality control
-- **Screencapture video streaming**: Stream mjpeg/h264 video directly from device
-- **Device Control**: Reboot devices, tap screen coordinates, press hardware buttons
-- **App Management**: Launch, terminate, install, uninstall, list, and get foreground apps
-
-### 🎯 Platform Support
+## Platform Support
 
 | Platform | Supported |
 |----------|:---------:|
-| iOS Real Device | ✅ |
-| iOS Simulator | ✅ |
-| Android Real Device | ✅ |
-| Android Emulator | ✅ |
+| Android Real Device | Yes |
+| Android Emulator | Yes |
+| iOS Real Device | No (removed) |
+| iOS Simulator | No (removed) |
 
-## Installation 📦
+## Installation
 
-#### Prerequisites 📋
-- **Android SDK** with `adb` in PATH (for Android device support)
-- **Xcode Command Line Tools** (for iOS simulator support on macOS)
+### Prerequisites
 
-#### Run instantly with npx
+- **Android SDK** with `adb` in PATH
+- **Go 1.25+** (for building from source)
+
+### Build from Source
+
 ```bash
-npx @mobilenext/mobilecli@latest
-```
-
-#### Install globally with npm
-```bash
-npm install -g @mobilenext/mobilecli@latest
-```
-
-#### Install from Source 🛠️
-```bash
-git clone https://github.com/mobile-next/mobilecli.git
-cd mobilecli
+git clone https://github.com/Gemutly/AndroidSkittles.git
+cd AndroidSkittles
 make build
 ```
 
-### Install Dependencies
+### Install Android Platform Tools
 
-#### 🍎 For iOS Simulator Support
-
-Xcode is required. Make sure you have it installed with the runtimes relevant for you installed. You will have to create Simulators and have them booted before `mobilecli` can use them.
-
-`mobilecli` will automatically install an agent on the device that is required for functions such as tapping on elements, pressing buttons and streaming screen capture.
-
-#### 🤖 For Android Support
 ```bash
-# Install Android SDK and ensure adb is in PATH
-# Download from: https://developer.android.com/studio/command-line/adb
-# or
+# macOS
 brew install --cask android-platform-tools
+
+# Windows (with Chocolatey)
+choco install adb
+
+# Linux
+sudo apt install android-tools-adb
 ```
 
 ## Usage
 
-### List Connected Devices 🔍
+All commands output JSON for easy parsing.
+
+### List Devices
 
 ```bash
-# List all online devices and simulators
-mobilecli devices
+# List online devices
+androidskittles devices
 
-# List all devices including offline emulators and simulators
-mobilecli devices --include-offline
+# Include offline emulators
+androidskittles devices --include-offline
 ```
 
 Example output:
 ```json
 [
   {
-    "id": "12345678-1234567890ABCDEF",
-    "name": "iPhone 15",
-    "platform": "ios",
-    "type": "real",
-    "state": "online"
-  },
-  {
-    "id": "Pixel_6",
+    "id": "emulator-5554",
     "name": "Pixel 6",
     "platform": "android",
     "type": "emulator",
     "state": "online"
-  },
-  {
-    "id": "iPhone_13",
-    "name": "iPhone 13",
-    "platform": "ios",
-    "type": "simulator",
-    "state": "offline"
   }
 ]
 ```
 
-**Note**: Offline emulators and simulators can be booted using the `mobilecli device boot` command.
-
-### Take Screenshots 📸
+### Screenshots
 
 ```bash
-# Take a PNG screenshot (default)
-mobilecli screenshot --device <device-id>
+# PNG screenshot (default)
+androidskittles screenshot --device <device-id>
 
-# Take a JPEG screenshot with custom quality
-mobilecli screenshot --device <device-id> --format jpeg --quality 80
+# JPEG with quality
+androidskittles screenshot --device <device-id> --format jpeg --quality 80
 
-# Save to specific path
-mobilecli screenshot --device <device-id> --output screenshot.png
+# Save to file
+androidskittles screenshot --device <device-id> --output screen.png
 
-# Output to stdout
-mobilecli screenshot --device <device-id> --output -
+# Output to stdout (for piping)
+androidskittles screenshot --device <device-id> --output -
 ```
 
-### Stream Screen 🎥
+### Screen Streaming
 
 ```bash
-mobilecli screencapture --device <device-id> --format mjpeg | ffplay -
+androidskittles screencapture --device <device-id> --format mjpeg | ffplay -
 ```
 
-Note that screencapture is one way. You will have to use `io tap` commands to tap on the screen.
-
-### Device Control 🎮
+### Device Control
 
 ```bash
-# Boot an offline emulator or simulator
-mobilecli device boot --device <device-id>
+# Boot emulator
+androidskittles device boot --device <device-id>
 
-# Shutdown a running emulator or simulator
-mobilecli device shutdown --device <device-id>
+# Shutdown emulator
+androidskittles device shutdown --device <device-id>
 
-# Reboot a device
-mobilecli device reboot --device <device-id>
+# Reboot device
+androidskittles device reboot --device <device-id>
 
-# Tap at coordinates (x,y)
-mobilecli io tap --device <device-id> 100,200
+# Tap at coordinates
+androidskittles io tap --device <device-id> 100,200
 
-# Long press at coordinates (x,y) with optional duration in milliseconds
-mobilecli io longpress --device <device-id> 100,200
-mobilecli io longpress --device <device-id> 100,200 --duration 2000
+# Long press
+androidskittles io longpress --device <device-id> 100,200 --duration 2000
 
-# Press hardware buttons
-mobilecli io button --device <device-id> HOME
-mobilecli io button --device <device-id> VOLUME_UP
-mobilecli io button --device <device-id> POWER
+# Swipe
+androidskittles io swipe --device <device-id> 100,500 100,200
+
+# Hardware buttons
+androidskittles io button --device <device-id> HOME
+androidskittles io button --device <device-id> BACK
+androidskittles io button --device <device-id> VOLUME_UP
 
 # Send text
-mobilecli io text --device <device-id> 'hello world'
+androidskittles io text --device <device-id> 'hello world'
 ```
 
-### Supported Hardware Buttons
+### Supported Buttons
 
-- `HOME` - Home button
-- `BACK` - Back button (Android only)
-- `POWER` - Power button
-- `VOLUME_UP`, `VOLUME_DOWN` - Volume up and down
-- `DPAD_UP`, `DPAD_DOWN`, `DPAD_LEFT`, `DPAD_RIGHT`, `DPAD_CENTER` - D-pad controls (Android only)
+| Button | Description |
+|--------|-------------|
+| `HOME` | Home button |
+| `BACK` | Back button |
+| `POWER` | Power button |
+| `VOLUME_UP` | Volume up |
+| `VOLUME_DOWN` | Volume down |
+| `DPAD_UP/DOWN/LEFT/RIGHT/CENTER` | D-pad controls |
 
-### App Management 📱
+### App Management
 
 ```bash
-# List installed apps on device
-mobilecli apps list --device <device-id>
+# List installed apps
+androidskittles apps list --device <device-id>
 
-# Get currently foreground app
-mobilecli apps foreground --device <device-id>
+# Get foreground app
+androidskittles apps foreground --device <device-id>
 
-# Launch an app
-mobilecli apps launch <bundle-id> --device <device-id>
+# Launch app
+androidskittles apps launch com.example.app --device <device-id>
 
-# Terminate an app
-mobilecli apps terminate <bundle-id> --device <device-id>
+# Terminate app
+androidskittles apps terminate com.example.app --device <device-id>
 
-# Install an app (.apk for Android, .ipa for iOS, .zip for iOS Simulator)
-mobilecli apps install <path> --device <device-id>
+# Install APK
+androidskittles apps install /path/to/app.apk --device <device-id>
 
-# Uninstall an app
-mobilecli apps uninstall <bundle-id> --device <device-id>
+# Uninstall app
+androidskittles apps uninstall com.example.app --device <device-id>
 ```
 
-Example output for `apps foreground`:
-```json
-{
-  "status": "ok",
-  "data": {
-    "packageName": "com.example.app",
-    "appName": "Example App",
-    "version": "1.0.0"
-  }
-}
+## HTTP API
+
+Start the server for HTTP/WebSocket access:
+
+```bash
+androidskittles server start --port 12000
 ```
 
-## HTTP API 🔌
-
-***mobilecli*** provides an http interface for all the functionality that is available through command line. As a matter of fact, it is preferable to
-use mobilecli as a webserver, so it can cache and keep tunnels alive, speeding up your interactions with the mobile device or simulator/emulator.
+### JSON-RPC 2.0 Examples
 
 ```bash
-# Start the server (default port 12000)
-mobile server start
+# List devices
+curl http://localhost:12000/rpc -X POST -d '{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "devices.list",
+  "params": {}
+}'
 
-curl http://localhost:12000/rpc -XPOST -d '{"jsonrpc":"2.0", "id": 1, "method": "devices", "params": {}}'
-curl http://localhost:12000/rpc -XPOST -d '{"jsonrpc":"2.0", "id": 1, "method": "screenshot", "params": {"deviceId": "your-device-id"}}'
+# Take screenshot
+curl http://localhost:12000/rpc -X POST -d '{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "device.screenshot",
+  "params": {"deviceId": "emulator-5554"}
+}'
 
-## WebSocket Support 🔌
+# Tap screen
+curl http://localhost:12000/rpc -X POST -d '{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "device.io.tap",
+  "params": {"deviceId": "emulator-5554", "x": 100, "y": 200}
+}'
+```
 
-***mobilecli*** includes a WebSocket server that allows multiple requests over a single connection using the same JSON-RPC 2.0 format as the HTTP API.
+### Available RPC Methods
+
+| Method | Description |
+|--------|-------------|
+| `devices.list` | List connected devices |
+| `device.screenshot` | Capture screenshot |
+| `device.info` | Get device info |
+| `device.boot` | Boot emulator |
+| `device.shutdown` | Shutdown emulator |
+| `device.reboot` | Reboot device |
+| `device.io.tap` | Tap coordinates |
+| `device.io.longpress` | Long press |
+| `device.io.swipe` | Swipe gesture |
+| `device.io.button` | Press button |
+| `device.io.text` | Send text |
+| `device.apps.list` | List apps |
+| `device.apps.launch` | Launch app |
+| `device.apps.terminate` | Terminate app |
+| `device.apps.install` | Install app |
+| `device.apps.uninstall` | Uninstall app |
+
+## WebSocket Support
+
+Connect via WebSocket for persistent connections:
 
 ```bash
-# Start the server (default port 12000)
-mobilecli server start
-
-# Connect and send requests using wscat
 wscat -c ws://localhost:12000/ws
-> {"jsonrpc":"2.0","id":1,"method":"devices","params":{}}
+
+> {"jsonrpc":"2.0","id":1,"method":"devices.list","params":{}}
 < {"jsonrpc":"2.0","id":1,"result":[...]}
-> {"jsonrpc":"2.0","id":2,"method":"screenshot","params":{"deviceId":"your-device-id"}}
-< {"jsonrpc":"2.0","id":2,"result":{...}}
 ```
 
-**Note**: `screencapture` is not supported over WebSocket - use the HTTP `/rpc` endpoint for video streaming.
+## Development
 
-## Platform-Specific Notes
-
-### iOS Real Devices
-- Currently requires that you install and run WebDriverAgent manually. You may change the BUNDLE IDENTIFIER, and *mobilecli* will be able to launch it if needed, as long as the identifier ends with `*.WebDriverAgent`.
-
-## Development 👩‍💻
-
-### Building 🛠️
-
-Please refer to (docs/TESTING.md) for further instructions regarding testing *mobilecli* locally.
+### Build & Test
 
 ```bash
-make lint
-make build
-make test
+make build       # Build binary
+make test        # Run unit tests
+make test-cover  # Run with coverage
+make lint        # Run linter
+make fmt         # Format code
 ```
 
-## Support 💬
+### Run Single Test
 
-For issues and feature requests, please use the [GitHub Issues](https://github.com/mobile-next/mobilecli/issues) page.
+```bash
+go test -v -run TestName ./path/to/package
+```
 
-Be sure to <a href="http://mobilenexthq.com/join-slack">join our slack channel</a> today 💜
+### Project Structure
 
-To learn more about <a href="https://mobilenexthq.com/">Mobile Next</a> and what we're building, <a href="https://mobilenexthq.com/#newsletter">subscribe to our newsletter</a>.
+```
+androidskittles/
+├── cli/           # Cobra CLI commands
+├── commands/      # Business logic
+├── devices/       # Device abstraction layer
+├── server/        # HTTP/WebSocket server
+├── daemon/        # Background process support
+├── types/         # Type definitions
+├── utils/         # Utilities
+└── main.go        # Entry point
+```
 
+## License
+
+AGPL v3.0 - See [LICENSE](LICENSE) for details.
+
+## Acknowledgments
+
+Forked from [mobilecli](https://github.com/mobile-next/mobilecli) by Mobile Next.
